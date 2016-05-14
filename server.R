@@ -28,7 +28,7 @@ shinyServer(function(input, output) {
   })
   
   output$distPlot <- renderPlot({
-  #attach(bsp_lax_stats)
+  attach(bsp_lax_stats)
     
     if (input$chrt_type == "3D Plot") {
       render3dPlot(bsp_lax_stats, input) 
@@ -48,6 +48,8 @@ shinyServer(function(input, output) {
   #trans_stat <- t(tmp_stat)
   output$table <- renderDataTable(temp_stat)
   
+  detach(bsp_lax_stats)
+  rm(bsp_lax_stats)
   cleanup(bsp_lax_stats)
 }) #end shinyServer
 
@@ -56,7 +58,7 @@ shinyServer(function(input, output) {
 #Utility Functions
 #cleanup: Clean up session.  To be used at of shiney server block
 cleanup <- function(stats){
-  rm(stats)
+  detach(stats)
 }
 
 #lm_eqn: Generate lm equation for print a plot
