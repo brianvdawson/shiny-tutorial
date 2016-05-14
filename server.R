@@ -46,7 +46,7 @@ shinyServer(function(input, output) {
   rownames(tmp_stat) <- paste(letters[1:16])
   colnames(tmp_stat) <- paste(names(tmp_stat))
   #trans_stat <- t(tmp_stat)
-  output$table <- renderDataTable(temp_stat)
+  output$table <- renderDataTable(tmp_stat)
   
   cleanup(bsp_lax_stats)
 }) #end shinyServer
@@ -96,13 +96,13 @@ ui3dPlot <- function(stats) {
       "angle", "Angle", min = 0, max = 360, value = 30, animate = TRUE
     ),
     selectInput(
-      "xstat", "X axis", choices = names(bsp_lax_stats), selected = "Diff"
+      "xstat", "X axis", choices = names(stats), selected = "Diff"
     ),
     selectInput(
-      "ystat", "Y axis", choices = names(bsp_lax_stats), selected = "Goals"
+      "ystat", "Y axis", choices = names(stats), selected = "Goals"
     ),
     selectInput(
-      "zstat", "Y axis", choices = names(bsp_lax_stats), selected = "PR"
+      "zstat", "Y axis", choices = names(stats), selected = "PR"
     ),
     radioButtons(
       "subsets", "Sub category", choices = c("All", "Wins", "Losses", "Higher PR", "Lower PR")
@@ -136,29 +136,29 @@ renderScatPlot <- function(stats, input) {
 
 #renderStatPlot: Render line graph
 renderStatPlot  <- function(input, output = NULL, stats = NULL){
-  plot(get(input$xstat),type = "l", ylab = input$xstat)
+  plot(stats[,input$xstat], ylab = input$xstat, type = "b")
   axis(1, at=1:16, labels = stats$Opponent )
 }
 
 
 #render3dPlot: Render 3D scatter plot
-render3dPlot <- function (bsp_lax_stats, input) {
+render3dPlot <- function (stats, input) {
   if (input$subsets != "All") {
-    bsp_lax_stats <- switch(
+    stats <- switch(
       input$subsets,
-      "Wins" = subset(bsp_lax_stats,Win > 0),
-      "Losses" = subset(bsp_lax_stats , Win < 0),
-      "Higher PR" = subset(bsp_lax_stats, PR.Ddif < 0),
-      "Lower PR" = subset(bsp_lax_stats, PR.Ddif > 0)
+      "Wins" = subset(stats,Win > 0),
+      "Losses" = subset(stats , Win < 0),
+      "Higher PR" = subset(stats, PR.Ddif < 0),
+      "Lower PR" = subset(stats, PR.Ddif > 0)
     )
   } #end if
   index = c(1,0,-1)
   #values = type.convert(c("Win","Tie","Loss"))
   shapes = c(19,17,17)
-  shape_data <- shapes[match(bsp_lax_stats$Win, index)]
+  shape_data <- shapes[match(stats$Win, index)]
   
   s3d <- scatterplot3d(
-    x = get(input$xstat), y = get(input$ystat), z = get(input$zstat),
+    x = stats[input$xstat], y = stats[input$ystat], z = stats[input$zstat],
     xlab = input$xstat, ylab = input$ystat, zlab =  input$zstat,
     pch = shape_data,
     type = "h", angle = input$angle, color = "steelblue", box = FALSE, cex.symbols = 1.5,
